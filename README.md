@@ -1,2 +1,2 @@
 # viz-parser
-##A data parser for the grid-page visualization project.##
+##A data parser for the grid-page visualization project.

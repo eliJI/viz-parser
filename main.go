@@ -18,9 +18,24 @@ type Fault struct {
 
 }
 
+//reduces duplicate pages, returning a shortened copy
+func reducePages(faults []Fault) []Fault {
+	tempFaults := make([]Fault, 0)
+	i := 0
+	for  i < (len(faults)-1) {
+		tempFaults = append(tempFaults,faults[i])
+		j := i
+		for faults[i] == faults[j] {
+			j++
+		}
+		i = j
+	}
+	return tempFaults
+}
+
 func main() {
 
-	faults := make([]Fault, 5)
+	faults := make([]Fault,0)
 	pathPtr := flag.String("path", "default value", "file path to the data")
 
 	flag.Parse()
@@ -48,7 +63,7 @@ func main() {
 		}
 		
 	}
-		b, err := json.MarshalIndent(faults,""," ")
+		b, err := json.MarshalIndent(reducePages(faults),""," ")
 
 		if err != nil{
 			log.Fatal(err)

@@ -21,13 +21,14 @@ func reduceDuplicates(faults []Fault) []Fault {
 	tempFaults := make([]Fault, 0)
 	i := 0
 	for i < len(faults)-1 {
+		tempFaults = append(tempFaults, faults[i])
 		j := i
 		for faults[i].Address == faults[j].Address && faults[i].FaultType == faults[j].FaultType {
 			j = j + 1
 		}
 		i = j
-		tempFaults = append(tempFaults, faults[i])
 	}
+	tempFaults = append(tempFaults, faults[len(faults)-1])
 	return tempFaults
 }
 

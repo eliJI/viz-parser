@@ -8,12 +8,12 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
+	"strconv"
 )
 
 type Fault struct {
 	FaultType string
-	Address   string
+	Address   int64
 }
 
 // reduces duplicate pages, returning a shortened copy
@@ -35,8 +35,8 @@ func reduceDuplicates(faults []Fault) []Fault {
 
 // returns ordred array of faults.
 // NOTE: our data seems to be in referenetial order already but this might not always be the case
-func getUnique(faults []Fault) []string {
-	uniqueAdresses := make([]string, 0)
+func getUnique(faults []Fault) []int64 {
+	uniqueAdresses := make([]int64, 0)
 	//starts at 2 because of s at start
 	for i := 2; i < len(faults); i++ {
 		key := faults[i]
@@ -61,14 +61,13 @@ func main() {
 	faults := make([]Fault, 0)
 	pathPtr := flag.String("path", "default value", "file path to the data")
 	flag.Parse()
-	data, err := os.ReadFile(*pathPtr)
+	data, err := os.Open(*pathPtr)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	content := string(data)
-	r := csv.NewReader(strings.NewReader(content))
+	r := csv.NewReader(data)
 
 	for {
 		record, err := r.Read()
@@ -79,11 +78,16 @@ func main() {
 			//fmt.Println(err)
 		}
 		if record[1] != "" && record[0] != "" {
-			faults = append(faults, Fault{FaultType: record[0], Address: record[1]})
+			conv, err := strconv.ParseInt(record[1], 16, 0)
+			if err != nil {
+				log.Fatal(err)
+			}
+			faults = append(faults, Fault{FaultType: record[0], Address: conv})
 		} else {
-			faults = append(faults, Fault{record[0], "na"})
+			faults = append(faults, Fault{record[0], -1})
 		}
 	}
+	data.Close()
 
 	fmt.Println(len(faults))
 	b, err := json.MarshalIndent(reduceDuplicates(faults), "", " ")
@@ -107,7 +111,7 @@ func main() {
 
 	uniqueAdresses := getUnique(reduceDuplicates(faults))
 	for i := 0; i < len(uniqueAdresses); i++ {
-		line := uniqueAdresses[i] + "\n"
+		line := strconv.FormatInt(uniqueAdresses[i], 10) + "\n"
 		_, err := uf.Write([]byte(line))
 		if err != nil {
 			log.Fatal((err))

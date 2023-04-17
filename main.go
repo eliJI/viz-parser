@@ -96,7 +96,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err2 := os.WriteFile("data.json", b, 0666)
+	err2 := os.WriteFile("batches.json", b, 0666)
 
 	if err2 != nil {
 		log.Fatal(err2)
